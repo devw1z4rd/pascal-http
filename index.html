@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithm Visualization Laboratory</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        .app-header .container {
+            text-align: left;
+        }
+        :root {
+            --color-primary: #0f172a;
+            --color-secondary: #334155;
+            --color-accent: #3b82f6;
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+            --color-error: #ef4444;
+            --color-surface: #ffffff;
+            --color-background: #f8fafc;
+            --color-border: #e2e8f0;
+            --color-text-primary: #0f172a;
+            --color-text-secondary: #64748b;
+            --color-text-muted: #94a3b8;
+            --spacing-unit: 1rem;
+            --border-radius: 4px;
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+            background-color: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+        
+        .app-layout {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .app-header {
+            background: var(--color-primary);
+            color: white;
+            padding: 0.4rem 0;
+            border-bottom: 2px solid var(--color-accent);
+        }
+
+        .app-header h1 {
+            font-size: clamp(0.95rem, 2vw, 1.15rem);
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.05rem;
+        }
+
+        .app-header p {
+            font-size: clamp(0.7rem, 1.2vw, 0.8rem);
+            color: #cbd5e1;
+            margin: 0;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            min-height: 0;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: var(--color-surface);
+            border-right: 1px solid var(--color-border);
+            padding: 0.75rem;
+            overflow-y: auto;
+            flex-shrink: 0;
+            max-height: calc(100vh - 80px);
+        }
+        
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        
+        .visualization-container {
+            flex: 1;
+            padding: var(--spacing-unit);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .section {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--border-radius);
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+        }
+        
+        .section-header {
+            background: #f1f5f9;
+            border-bottom: 1px solid var(--color-border);
+            padding: 0.5rem 0.75rem;
+            font-weight: 500;
+            font-size: 0.8rem;
+            color: var(--color-text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+        
+        .section-content {
+            padding: 0.75rem;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--border-radius);
+            font-size: 0.7rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .status-online {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .status-offline {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        
+        .status-connecting {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+        
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+        
+        .input-group {
+            margin-bottom: 0.75rem;
+        }
+        
+        .input-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--color-text-primary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 0.5rem 0.625rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--border-radius);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            background: var(--color-surface);
+            transition: var(--transition);
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid transparent;
+            border-radius: var(--border-radius);
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary {
+            background: var(--color-accent);
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: var(--color-secondary);
+            color: white;
+        }
+        
+        .btn-success {
+            background: var(--color-success);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: var(--color-warning);
+            color: white;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border-color: var(--color-border);
+            color: var(--color-text-primary);
+        }
+        
+        .btn-outline:hover:not(:disabled) {
+            background: var(--color-background);
+        }
+        
+        .btn-block {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        
+        .control-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .control-grid-full {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--color-surface);
+            border: 2px solid var(--color-border);
+            border-radius: var(--border-radius);
+            min-height: 400px;
+        }
+        
+        #algorithmCanvas {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: var(--border-radius);
+        }
+        
+        .progress-container {
+            margin-bottom: 0.75rem;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 5px;
+            background: var(--color-border);
+            border-radius: 2.5px;
+            overflow: hidden;
+            margin-bottom: 0.375rem;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--color-accent);
+            border-radius: 2.5px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        
+        .progress-text {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--color-text-secondary);
+            text-align: center;
+        }
+        
+        .operation-display {
+            background: #f8fafc;
+            border: 1px solid var(--color-border);
+            border-radius: var(--border-radius);
+            padding: 0.625rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            line-height: 1.3;
+            white-space: pre-line;
+            min-height: 80px;
+            color: var(--color-text-primary);
+        }
+        
+        .speed-control {
+            margin-bottom: 0.75rem;
+        }
+        
+        .speed-slider {
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: var(--color-border);
+            outline: none;
+            margin: 0.5rem 0;
+        }
+        
+        .speed-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--color-text-muted);
+        }
+        
+        .legend-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: #f8fafc;
+            border-radius: var(--border-radius);
+            font-size: 0.8rem;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+        
+        .complexity-display {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 1px solid #0ea5e9;
+            border-radius: var(--border-radius);
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .complexity-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #0c4a6e;
+            margin-bottom: 0.375rem;
+        }
+        
+        .complexity-list {
+            font-size: 0.7rem;
+            color: #075985;
+            line-height: 1.4;
+        }
+        
+        .mobile-drawer {
+            display: none;
+        }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 992px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                order: 2;
+                border-right: none;
+                border-top: 1px solid var(--color-border);
+                max-height: none;
+            }
+            
+            .content-area {
+                order: 1;
+            }
+            
+            .mobile-drawer {
+                display: block;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: var(--color-surface);
+                border-top: 2px solid var(--color-border);
+                padding: 1rem;
+                z-index: 1000;
+                transform: translateY(100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .mobile-drawer.active {
+                transform: translateY(0);
+            }
+            
+            .mobile-toggle {
+                position: fixed;
+                bottom: 1rem;
+                right: 1rem;
+                width: 56px;
+                height: 56px;
+                border-radius: 50%;
+                background: var(--color-accent);
+                color: white;
+                border: none;
+                font-size: 1.5rem;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                z-index: 1001;
+            }
+            
+            .sidebar {
+                display: none;
+            }
+            
+            body {
+                padding-bottom: 80px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .app-header {
+                padding: 1rem 0;
+            }
+            
+            .visualization-container {
+                padding: 0.5rem;
+            }
+            
+            .section-content {
+                padding: 0.75rem;
+            }
+            
+            .control-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .canvas-container {
+                min-height: 240px;
+            }
+        }
+        
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.4s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.6;
+            }
+        }
+        
+        /* Loading states */
+        .loading {
+            position: relative;
+            pointer-events: none;
+        }
+        
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 16px;
+            height: 16px;
+            margin: -8px 0 0 -8px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Focus styles */
+        .btn:focus,
+        .input-field:focus {
+            outline: 2px solid var(--color-accent);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="container">
+                <h1>Algorithm Visualization Laboratory</h1>
+                <p>Real-time analysis of computational sorting algorithms</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Sidebar Controls -->
+            <aside class="sidebar">
+                <!-- Server Status -->
+                <div class="section fade-in">
+                    <div class="section-header">Backend Status</div>
+                    <div class="section-content">
+                        <div class="status-badge status-connecting" id="connectionStatus">
+                            <span class="status-dot pulse"></span>
+                            <span id="statusText">Connecting</span>
+                        </div>
+                        <button class="btn btn-outline btn-block" id="refreshConnectionBtn">
+                            Refresh Connection
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Data Input -->
+                <div class="section fade-in">
+                    <div class="section-header">Data Configuration</div>
+                    <div class="section-content">
+                        <div class="input-group">
+                            <label class="input-label">Array Input</label>
+                            <input type="text" class="input-field" id="arrayInput" 
+                                   placeholder="1, 2, 3, 4, 5"
+                                   value="64, 34, 25, 12, 22, 11, 90">
+                        </div>
+                        <div class="control-grid-full">
+                            <button class="btn btn-primary" id="processBtn" disabled>Process Algorithm</button>
+                            <button class="btn btn-outline" id="sampleBtn" disabled>Load Sample</button>
+                            <button class="btn btn-outline" id="randomBtn">Generate Random</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Playback Controls -->
+                <div class="section fade-in">
+                    <div class="section-header">Execution Control</div>
+                    <div class="section-content">
+                        <div class="control-grid">
+                            <button class="btn btn-success" id="playButton" disabled>Play</button>
+                            <button class="btn btn-warning" id="pauseButton" disabled>Pause</button>
+                            <button class="btn btn-secondary" id="resetButton" disabled>Reset</button>
+                            <button class="btn btn-outline" id="stepButton" disabled>Step</button>
+                        </div>
+                        <div class="control-grid">
+                            <button class="btn btn-outline" id="backButton" disabled>← Back</button>
+                            <button class="btn btn-outline" id="forwardButton" disabled>Forward →</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Speed Control -->
+                <div class="section fade-in">
+                    <div class="section-header">Animation Speed</div>
+                    <div class="section-content">
+                        <div class="speed-control">
+                            <input type="range" class="speed-slider" id="speedSlider" 
+                                   min="100" max="2000" value="800">
+                            <div class="speed-labels">
+                                <span>Slow</span>
+                                <span id="speedDisplay">800ms</span>
+                                <span>Fast</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress -->
+                <div class="section fade-in">
+                    <div class="section-header">Progress</div>
+                    <div class="section-content">
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <div class="progress-text" id="progressText">0 / 0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Legend -->
+                <div class="section fade-in">
+                    <div class="section-header">Visual Legend</div>
+                    <div class="section-content">
+                        <div class="legend-container">
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #64748b;"></span>
+                                <span>Default State</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #f59e0b;"></span>
+                                <span>Comparing</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #ef4444;"></span>
+                                <span>Swapping</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #10b981;"></span>
+                                <span>Sorted</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Complexity Info -->
+                <div class="section fade-in">
+                    <div class="section-header">Complexity</div>
+                    <div class="section-content">
+                        <div class="complexity-display">
+                            <div class="complexity-title">Bubble Sort</div>
+                            <div class="complexity-list">
+                                Time: O(n²)<br>
+                                Space: O(1)<br>
+                                Stable: Yes<br>
+                                In-place: Yes
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Visualization -->
+                <div class="visualization-container">
+                    <div class="section fade-in" style="flex: 1; display: flex; flex-direction: column;">
+                        <div class="section-header">Bubble Sort Visualization</div>
+                        <div class="section-content" style="flex: 1; display: flex; flex-direction: column;">
+                            <div class="canvas-container">
+                                <canvas id="algorithmCanvas" width="700" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Operation Info -->
+                <div class="visualization-container" style="flex: 0; padding: 0.75rem 0.75rem 0;">
+                    <div class="section fade-in">
+                        <div class="section-header">Current Operation</div>
+                        <div class="section-content">
+                            <div class="operation-display" id="operationDisplay">
+                                System ready. Configure input data and establish backend connection to begin algorithm execution.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Controls -->
+    <div class="mobile-drawer" id="mobileDrawer">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0">Controls</h6>
+            <button class="btn btn-outline btn-sm" id="closeDrawerBtn">Close</button>
+        </div>
+        <div class="row g-2">
+            <div class="col-4">
+                <button class="btn btn-success w-100" id="mobilePlay" disabled>Play</button>
+            </div>
+            <div class="col-4">
+                <button class="btn btn-warning w-100" id="mobilePause" disabled>Pause</button>
+            </div>
+            <div class="col-4">
+                <button class="btn btn-secondary w-100" id="mobileReset" disabled>Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <button class="mobile-toggle d-lg-none" id="mobileToggle">⚙</button>
+
+    <script>
+        const SERVER_URL = 'http://localhost:8080';
+        
+        class AlgorithmVisualizationLab {
+            constructor() {
+                this.canvas = document.getElementById('algorithmCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.currentStep = 0;
+                this.isPlaying = false;
+                this.animationSpeed = 800;
+                this.intervalId = null;
+                this.algorithmData = [];
+                this.serverOnline = false;
+                
+                this.initializeInterface();
+                this.setupResponsiveCanvas();
+                this.checkServerConnection();
+                this.renderEmptyCanvas();
+            }
+            
+            initializeInterface() {
+                // Server controls
+                document.getElementById('refreshConnectionBtn').addEventListener('click', () => this.checkServerConnection());
+                
+                // Data controls
+                document.getElementById('processBtn').addEventListener('click', () => this.processAlgorithm());
+                document.getElementById('sampleBtn').addEventListener('click', () => this.loadSampleData());
+                document.getElementById('randomBtn').addEventListener('click', () => this.generateRandomData());
+                
+                // Playback controls
+                const playButtons = ['playButton', 'mobilePlay'];
+                const pauseButtons = ['pauseButton', 'mobilePause'];
+                const resetButtons = ['resetButton', 'mobileReset'];
+                
+                playButtons.forEach(id => {
+                    document.getElementById(id).addEventListener('click', () => this.playAnimation());
+                });
+                
+                pauseButtons.forEach(id => {
+                    document.getElementById(id).addEventListener('click', () => this.pauseAnimation());
+                });
+                
+                resetButtons.forEach(id => {
+                    document.getElementById(id).addEventListener('click', () => this.resetAnimation());
+                });
+                
+                document.getElementById('stepButton').addEventListener('click', () => this.stepForward());
+                document.getElementById('backButton').addEventListener('click', () => this.stepBack());
+                document.getElementById('forwardButton').addEventListener('click', () => this.stepForward());
+                
+                // Speed control
+                document.getElementById('speedSlider').addEventListener('input', (e) => {
+                    this.animationSpeed = parseInt(e.target.value);
+                    document.getElementById('speedDisplay').textContent = this.animationSpeed + 'ms';
+                    if (this.isPlaying) {
+                        this.pauseAnimation();
+                        this.playAnimation();
+                    }
+                });
+                
+                // Mobile drawer
+                document.getElementById('mobileToggle').addEventListener('click', () => this.toggleMobileDrawer());
+                document.getElementById('closeDrawerBtn').addEventListener('click', () => this.closeMobileDrawer());
+                
+                // Responsive handling
+                window.addEventListener('resize', () => this.setupResponsiveCanvas());
+            }
+            
+            setupResponsiveCanvas() {
+                const container = this.canvas.closest('.canvas-container');
+                const containerRect = container.getBoundingClientRect();
+                const maxWidth = containerRect.width - 32;
+                const maxHeight = containerRect.height - 32;
+                
+                // Более компактные размеры для лучшего размещения на экране
+                if (window.innerWidth <= 576) {
+                    this.canvas.width = Math.min(500, maxWidth);
+                    this.canvas.height = Math.min(240, maxHeight);
+                } else if (window.innerWidth <= 992) {
+                    this.canvas.width = Math.min(600, maxWidth);
+                    this.canvas.height = Math.min(280, maxHeight);
+                } else {
+                    this.canvas.width = Math.min(700, maxWidth);
+                    this.canvas.height = Math.min(300, maxHeight);
+                }
+                
+                this.renderVisualization();
+            }
+            
+            toggleMobileDrawer() {
+                const drawer = document.getElementById('mobileDrawer');
+                drawer.classList.toggle('active');
+            }
+            
+            closeMobileDrawer() {
+                document.getElementById('mobileDrawer').classList.remove('active');
+            }
+            
+            async checkServerConnection() {
+                const status = document.getElementById('connectionStatus');
+                const statusText = document.getElementById('statusText');
+                const refreshBtn = document.getElementById('refreshConnectionBtn');
+                
+                status.className = 'status-badge status-connecting';
+                statusText.textContent = 'Connecting';
+                refreshBtn.disabled = true;
+                
+                try {
+                    const response = await fetch(`${SERVER_URL}/test`, {
+                        method: 'GET',
+                        mode: 'cors',
+                        headers: { 'Accept': 'application/json' },
+                        signal: AbortSignal.timeout(3000)
+                    });
+                    
+                    if (response.ok) {
+                        this.serverOnline = true;
+                        status.className = 'status-badge status-online';
+                        statusText.textContent = 'Online';
+                        this.enableServerControls(true);
+                    } else {
+                        throw new Error('Server error');
+                    }
+                } catch (error) {
+                    this.serverOnline = false;
+                    status.className = 'status-badge status-offline';
+                    statusText.textContent = 'Offline';
+                    this.enableServerControls(false);
+                } finally {
+                    refreshBtn.disabled = false;
+                }
+            }
+            
+            enableServerControls(enabled) {
+                document.getElementById('processBtn').disabled = !enabled;
+                document.getElementById('sampleBtn').disabled = !enabled;
+            }
+            
+            async processAlgorithm() {
+                const inputValue = document.getElementById('arrayInput').value.trim();
+                const numbers = inputValue.split(',').map(x => parseInt(x.trim())).filter(x => !isNaN(x));
+                
+                if (numbers.length === 0) {
+                    this.showNotification('Please enter valid integers', 'error');
+                    return;
+                }
+                
+                if (numbers.length > 20) {
+                    this.showNotification('Maximum 20 elements allowed', 'warning');
+                    return;
+                }
+                
+                const processBtn = document.getElementById('processBtn');
+                processBtn.classList.add('loading');
+                processBtn.disabled = true;
+                
+                try {
+                    const response = await fetch(`${SERVER_URL}/sort`, {
+                        method: 'POST',
+                        mode: 'cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ array: numbers })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Server error: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    this.loadAlgorithmData(data);
+                    
+                } catch (error) {
+                    this.showNotification(`Processing failed: ${error.message}`, 'error');
+                } finally {
+                    processBtn.classList.remove('loading');
+                    processBtn.disabled = !this.serverOnline;
+                }
+            }
+            
+            async loadSampleData() {
+                const sampleBtn = document.getElementById('sampleBtn');
+                sampleBtn.classList.add('loading');
+                sampleBtn.disabled = true;
+                
+                try {
+                    const response = await fetch(`${SERVER_URL}/test`, {
+                        method: 'GET',
+                        mode: 'cors',
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Server error: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    this.loadAlgorithmData(data);
+                    document.getElementById('arrayInput').value = '64, 34, 25, 12, 22, 11, 90';
+                    
+                } catch (error) {
+                    this.showNotification(`Sample load failed: ${error.message}`, 'error');
+                } finally {
+                    sampleBtn.classList.remove('loading');
+                    sampleBtn.disabled = !this.serverOnline;
+                }
+            }
+            
+            generateRandomData() {
+                const size = Math.floor(Math.random() * 8) + 5;
+                const numbers = Array.from({length: size}, () => Math.floor(Math.random() * 100) + 1);
+                document.getElementById('arrayInput').value = numbers.join(', ');
+            }
+            
+            loadAlgorithmData(data) {
+                this.algorithmData = data;
+                this.currentStep = 0;
+                this.enablePlaybackControls(true);
+                this.updateProgress();
+                this.updateOperation();
+                this.renderVisualization();
+            }
+            
+            enablePlaybackControls(enabled) {
+                const controls = [
+                    'playButton', 'pauseButton', 'resetButton', 'stepButton',
+                    'backButton', 'forwardButton', 'mobilePlay', 'mobilePause', 'mobileReset'
+                ];
+                controls.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) element.disabled = !enabled;
+                });
+            }
+            
+            playAnimation() {
+                if (this.algorithmData.length === 0) return;
+                
+                if (this.currentStep >= this.algorithmData.length - 1) {
+                    this.resetAnimation();
+                }
+                
+                this.isPlaying = true;
+                this.intervalId = setInterval(() => {
+                    this.stepForward();
+                    if (this.currentStep >= this.algorithmData.length - 1) {
+                        this.pauseAnimation();
+                    }
+                }, this.animationSpeed);
+            }
+            
+            pauseAnimation() {
+                this.isPlaying = false;
+                if (this.intervalId) {
+                    clearInterval(this.intervalId);
+                    this.intervalId = null;
+                }
+            }
+            
+            resetAnimation() {
+                this.pauseAnimation();
+                this.currentStep = 0;
+                this.updateProgress();
+                this.updateOperation();
+                this.renderVisualization();
+            }
+            
+            stepForward() {
+                if (this.currentStep < this.algorithmData.length - 1) {
+                    this.currentStep++;
+                    this.updateProgress();
+                    this.updateOperation();
+                    this.renderVisualization();
+                }
+            }
+            
+            stepBack() {
+                if (this.currentStep > 0) {
+                    this.currentStep--;
+                    this.updateProgress();
+                    this.updateOperation();
+                    this.renderVisualization();
+                }
+            }
+            
+            updateProgress() {
+                if (this.algorithmData.length === 0) return;
+                
+                const progress = ((this.currentStep + 1) / this.algorithmData.length) * 100;
+                document.getElementById('progressFill').style.width = progress + '%';
+                document.getElementById('progressText').textContent = 
+                    `${this.currentStep + 1} / ${this.algorithmData.length}`;
+            }
+            
+            updateOperation() {
+                if (this.algorithmData.length === 0) return;
+                
+                const event = this.algorithmData[this.currentStep];
+                let operationText = `STEP ${event.step}: ${event.action.toUpperCase()}\n`;
+                
+                switch (event.action) {
+                    case 'compare':
+                        operationText += `Positions: [${event.compare_indices[0]}] vs [${event.compare_indices[1]}]\n`;
+                        operationText += `Values: ${event.compare_values[0]} vs ${event.compare_values[1]}\n`;
+                        operationText += `Result: ${event.compare_values[0] > event.compare_values[1] ? 'Swap required' : 'No swap needed'}`;
+                        break;
+                    case 'swap':
+                        operationText += `Exchanging positions [${event.swap_indices[0]}] and [${event.swap_indices[1]}]\n`;
+                        operationText += `Values: ${event.compare_values[0]} ↔ ${event.compare_values[1]}`;
+                        break;
+                    case 'init':
+                        operationText += `Algorithm initialized\nArray loaded for processing`;
+                        break;
+                    case 'finished':
+                        operationText += `Sorting completed successfully\nArray is now sorted in ascending order`;
+                        break;
+                }
+                
+                document.getElementById('operationDisplay').textContent = operationText;
+            }
+            
+            renderEmptyCanvas() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                this.ctx.fillStyle = '#94a3b8';
+                this.ctx.font = `${Math.min(16, this.canvas.width / 30)}px IBM Plex Sans`;
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('Connect to backend and load data to begin visualization', 
+                                this.canvas.width / 2, this.canvas.height / 2);
+            }
+            
+            renderVisualization() {
+                if (this.algorithmData.length === 0) {
+                    this.renderEmptyCanvas();
+                    return;
+                }
+                
+                const event = this.algorithmData[this.currentStep];
+                let array = event.array_state;
+                
+                if (typeof array === 'string') {
+                    try {
+                        array = JSON.parse(array);
+                    } catch (e) {
+                        console.error('JSON parse error:', e);
+                        return;
+                    }
+                }
+                
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                if (array.length === 0) return;
+                
+                const maxValue = Math.max(...array);
+                const minValue = Math.min(...array);
+                const valueRange = maxValue - minValue || 1;
+                
+                const margin = this.canvas.width * 0.08;
+                const availableWidth = this.canvas.width - (margin * 2);
+                const barWidth = Math.min(40, availableWidth / array.length * 0.75);
+                const barSpacing = availableWidth / array.length;
+                const maxBarHeight = this.canvas.height * 0.65;
+                const baseY = this.canvas.height - this.canvas.height * 0.2;
+                
+                for (let i = 0; i < array.length; i++) {
+                    const normalizedValue = (array[i] - minValue) / valueRange;
+                    const barHeight = Math.max(15, normalizedValue * maxBarHeight);
+                    const x = margin + i * barSpacing + (barSpacing - barWidth) / 2;
+                    const y = baseY - barHeight;
+                    
+                    // Color determination
+                    let fillColor = '#64748b';
+                    let strokeColor = '#475569';
+                    
+                    if (event.action === 'compare' && 
+                        (i === event.compare_indices[0] || i === event.compare_indices[1])) {
+                        fillColor = '#f59e0b';
+                        strokeColor = '#d97706';
+                    } else if (event.action === 'swap' && 
+                               (i === event.swap_indices[0] || i === event.swap_indices[1])) {
+                        fillColor = '#ef4444';
+                        strokeColor = '#dc2626';
+                    } else if (event.action === 'finished') {
+                        fillColor = '#10b981';
+                        strokeColor = '#059669';
+                    }
+                    
+                    // Draw bar
+                    this.ctx.fillStyle = fillColor;
+                    this.ctx.fillRect(x, y, barWidth, barHeight);
+                    
+                    // Draw border
+                    this.ctx.strokeStyle = strokeColor;
+                    this.ctx.lineWidth = 1.5;
+                    this.ctx.strokeRect(x, y, barWidth, barHeight);
+                    
+                    // Value label
+                    this.ctx.fillStyle = '#0f172a';
+                    this.ctx.font = `500 ${Math.min(12, barWidth / 2.5)}px IBM Plex Mono`;
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText(array[i], x + barWidth / 2, y - 6);
+                    
+                    // Index label
+                    this.ctx.fillStyle = '#64748b';
+                    this.ctx.font = `400 ${Math.min(10, barWidth / 3)}px IBM Plex Mono`;
+                    this.ctx.fillText(i, x + barWidth / 2, baseY + 15);
+                }
+                
+                // Operation indicator
+                if ((event.action === 'compare' || event.action === 'swap') && 
+                    event.compare_indices[0] !== -1) {
+                    this.drawOperationLine(event, barSpacing, margin);
+                }
+            }
+            
+            drawOperationLine(event, barSpacing, margin) {
+                const x1 = margin + event.compare_indices[0] * barSpacing + barSpacing / 2;
+                const x2 = margin + event.compare_indices[1] * barSpacing + barSpacing / 2;
+                const y = this.canvas.height - this.canvas.height * 0.1;
+                
+                this.ctx.strokeStyle = event.action === 'swap' ? '#ef4444' : '#f59e0b';
+                this.ctx.lineWidth = 2;
+                this.ctx.setLineDash([4, 4]);
+                
+                this.ctx.beginPath();
+                this.ctx.moveTo(x1, y);
+                this.ctx.lineTo(x2, y);
+                this.ctx.stroke();
+                this.ctx.setLineDash([]);
+                
+                // Endpoint markers
+                this.ctx.fillStyle = this.ctx.strokeStyle;
+                this.ctx.beginPath();
+                this.ctx.arc(x1, y, 3, 0, 2 * Math.PI);
+                this.ctx.arc(x2, y, 3, 0, 2 * Math.PI);
+                this.ctx.fill();
+            }
+            
+            showNotification(message, type = 'info') {
+                const colors = {
+                    info: '#3b82f6',
+                    success: '#10b981',
+                    warning: '#f59e0b',
+                    error: '#ef4444'
+                };
+                
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: white;
+                    border-left: 4px solid ${colors[type]};
+                    padding: 1rem;
+                    border-radius: 4px;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                    z-index: 9999;
+                    max-width: 300px;
+                    font-size: 0.875rem;
+                `;
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => notification.remove(), 3000);
+            }
+        }
+        
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', () => {
+            new AlgorithmVisualizationLab();
+        });
+    </script>
+</body>
+</html>
